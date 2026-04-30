@@ -1,0 +1,6 @@
+{
+  "name": "PDF Ժամանակագրական Դասավորիչ (Gemini AI)",
+  "description": "PDF փաստաթղթերի դասավորում ըստ ամսաթվի՝ օգտագործելով Google Gemini AI տեխնոլոգիան:",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

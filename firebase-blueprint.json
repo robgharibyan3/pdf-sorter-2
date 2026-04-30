@@ -1,0 +1,24 @@
+{
+  "entities": {
+    "Feedback": {
+      "title": "Feedback",
+      "description": "User feedback for incorrect date extractions",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "ID of the user submitting the feedback" },
+        "fileName": { "type": "string", "description": "Name of the file" },
+        "extractedDate": { "type": "string", "description": "The date the system extracted" },
+        "expectedDate": { "type": "string", "description": "The date the user expected" },
+        "comments": { "type": "string", "description": "User comments" },
+        "createdAt": { "type": "timestamp", "description": "When the feedback was submitted" }
+      },
+      "required": ["userId", "fileName", "extractedDate", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/feedback/{feedbackId}": {
+      "schema": { "$ref": "#/entities/Feedback" },
+      "description": "Collection of user feedback"
+    }
+  }
+}

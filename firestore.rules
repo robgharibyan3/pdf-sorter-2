@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    // Collection: feedback
+    // Document ID: auto-generated
+    // Fields:
+    //   - userId: string (required) - ID of the user submitting the feedback
+    //   - fileName: string (required) - Name of the file
+    //   - extractedDate: string (required) - The date the system extracted
+    //   - expectedDate: string (optional) - The date the user expected
+    //   - comments: string (optional) - User comments
+    //   - createdAt: timestamp (required) - When the feedback was submitted
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+    function isValidFeedback() {
+      let data = request.resource.data;
+      return hasRequiredFields(['userId', 'fileName', 'extractedDate', 'createdAt']) &&
+             hasOnlyAllowedFields(['userId', 'fileName', 'extractedDate', 'expectedDate', 'comments', 'createdAt']) &&
+             data.userId is string && data.userId == request.auth.uid &&
+             data.fileName is string && data.fileName.size() > 0 && data.fileName.size() < 256 &&
+             data.extractedDate is string && data.extractedDate.size() < 100 &&
+             (!('expectedDate' in data) || (data.expectedDate is string && data.expectedDate.size() < 100)) &&
+             (!('comments' in data) || (data.comments is string && data.comments.size() < 1000)) &&
+             data.createdAt is timestamp;
+    }
+
+    match /feedback/{feedbackId} {
+      allow create: if isAuthenticated() && isValidFeedback();
+      allow read: if isOwner(resource.data.userId);
+      allow update, delete: if false; // Feedback is immutable once submitted
+    }
+  }
+}
